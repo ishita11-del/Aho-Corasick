@@ -173,15 +173,24 @@
       const matches = [];
       const startTime = performance.now();
 
+      // True naive search: check every position for every pattern
       for (const pattern of patterns) {
-        let index = text.indexOf(pattern);
-        while (index !== -1) {
-          matches.push({ 
-            start: index, 
-            end: index + pattern.length,
-            pattern: pattern 
-          });
-          index = text.indexOf(pattern, index + 1);
+        for (let i = 0; i <= text.length - pattern.length; i++) {
+          let match = true;
+          // Character-by-character comparison
+          for (let j = 0; j < pattern.length; j++) {
+            if (text[i + j] !== pattern[j]) {
+              match = false;
+              break;
+            }
+          }
+          if (match) {
+            matches.push({ 
+              start: i, 
+              end: i + pattern.length,
+              pattern: pattern 
+            });
+          }
         }
       }
 
@@ -321,13 +330,12 @@
           : ((avgNaive / avgAhoTotal - 1) * 100).toFixed(1);
 
         document.getElementById('outputArea').innerHTML = highlightText(text, matches);
-        document.getElementById('timeDisplay').innerHTML = `
-          <div class="space-y-1">
-            <div>🔍 <strong>Naive:</strong> ${avgNaive.toFixed(4)} ms (avg of ${runs} runs)</div>
-            <div>⚡ <strong>Aho-Corasick:</strong> Build: ${avgAhoBuild.toFixed(4)} ms | Search: ${avgAhoSearch.toFixed(4)} ms | Total: ${avgAhoTotal.toFixed(4)} ms</div>
-            <div class="text-yellow-400 mt-2">🏆 <strong>${winner}</strong> is ${speedup}% faster for this input!</div>
-          </div>
-        `;
+        document.getElementById('timeDisplay').innerHTML = 
+          '<div class="space-y-1">' +
+            '<div>🔍 <strong>Naive:</strong> ' + avgNaive.toFixed(4) + ' ms (avg of ' + runs + ' runs)</div>' +
+            '<div>⚡ <strong>Aho-Corasick:</strong> Build: ' + avgAhoBuild.toFixed(4) + ' ms | Search: ' + avgAhoSearch.toFixed(4) + ' ms | Total: ' + avgAhoTotal.toFixed(4) + ' ms</div>' +
+            '<div class="text-yellow-400 mt-2">🏆 <strong>' + winner + '</strong> is ' + speedup + '% faster for this input!</div>' +
+          '</div>';
         document.getElementById('matchCount').textContent = `Found ${matches.length} match(es)`;
       }, 100);
     });
