@@ -30,6 +30,10 @@
       <p class="text-gray-400 mb-2">Enter your text and patterns (comma-separated):</p>
       <textarea id="textInput" class="w-full p-3 border border-gray-700 rounded mb-3 bg-slate-800 text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none" rows="4" placeholder="Enter text here...">she sells seashells by the seashore</textarea>
       <input id="patternsInput" class="w-full p-3 border border-gray-700 rounded mb-4 bg-slate-800 text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Enter patterns (e.g., he,she,his,hers)" value="she,sea,shells,shore" />
+      
+      <button id="loadLargeBtn" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded shadow-lg transition mb-4">
+        📊 Load Large Test (See the difference!)
+      </button>
 
       <div class="flex gap-4">
         <button id="naiveBtn" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded shadow-lg transition">
@@ -56,6 +60,9 @@
         </p>
         <p class="text-gray-300 mb-3">
           <strong class="text-blue-400">Time Complexity:</strong> O(n + m + z) where n = text length, m = total pattern length, z = matches
+        </p>
+        <p class="text-gray-300 mb-3">
+          <strong class="text-yellow-400">Performance Note:</strong> For small texts, naive search may be faster due to zero preprocessing. Aho-Corasick shines with large texts and many patterns!
         </p>
         <p class="text-gray-300">
           <strong class="text-purple-400">Applications:</strong> Spam filters, plagiarism detection, DNA pattern matching, search engines, intrusion detection systems.
@@ -243,6 +250,20 @@
       document.getElementById('timeDisplay').textContent = `⚡ Aho–Corasick | Build: ${buildTime.toFixed(4)} ms | Search: ${time.toFixed(4)} ms | Total: ${totalTime.toFixed(4)} ms`;
       document.getElementById('matchCount').textContent = `Found ${matches.length} match(es)`;
     });
+
+    document.getElementById('loadLargeBtn').addEventListener('click', () => {
+      // Generate a large text sample to demonstrate Aho-Corasick's advantages
+      const paragraph = "Data structures and algorithms are the backbone of computer science. Searching for specific patterns efficiently is crucial in applications like search engines, spam detection, and DNA sequencing. ";
+      const largeText = paragraph.repeat(100); // ~17,000 characters
+      const patterns = "data,algorithm,search,pattern,DNA,computer,spam,efficient,science,structure";
+      
+      document.getElementById('textInput').value = largeText;
+      document.getElementById('patternsInput').value = patterns;
+      document.getElementById('outputArea').innerHTML = '<span class="text-green-400">✅ Large test data loaded! Now try both search methods and compare times.</span>';
+      document.getElementById('timeDisplay').textContent = '';
+      document.getElementById('matchCount').textContent = `Text length: ${largeText.length} chars | Patterns: ${patterns.split(',').length}`;
+    });
+  
   </script>
 </body>
 </html>
