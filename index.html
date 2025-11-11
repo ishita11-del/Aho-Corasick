@@ -181,15 +181,23 @@
 
     function ahoCorasickSearch(text, patterns) {
       if (!text || patterns.length === 0) {
-        return { matches: [], time: 0 };
+        return { matches: [], time: 0, buildTime: 0 };
       }
 
-      const startTime = performance.now();
+      const buildStart = performance.now();
       const ac = new AhoCorasick(patterns);
-      const matches = ac.search(text);
-      const endTime = performance.now();
+      const buildEnd = performance.now();
 
-      return { matches, time: endTime - startTime };
+      const searchStart = performance.now();
+      const matches = ac.search(text);
+      const searchEnd = performance.now();
+
+      return { 
+        matches, 
+        time: searchEnd - searchStart,
+        buildTime: buildEnd - buildStart,
+        totalTime: (searchEnd - searchStart) + (buildEnd - buildStart)
+      };
     }
 
     document.getElementById('naiveBtn').addEventListener('click', () => {
@@ -230,9 +238,9 @@
         return;
       }
 
-      const { matches, time } = ahoCorasickSearch(text, patterns);
+      const { matches, time, buildTime, totalTime } = ahoCorasickSearch(text, patterns);
       document.getElementById('outputArea').innerHTML = highlightText(text, matches);
-      document.getElementById('timeDisplay').textContent = `⚡ Aho–Corasick Search Time: ${time.toFixed(4)} ms`;
+      document.getElementById('timeDisplay').textContent = `⚡ Aho–Corasick | Build: ${buildTime.toFixed(4)} ms | Search: ${time.toFixed(4)} ms | Total: ${totalTime.toFixed(4)} ms`;
       document.getElementById('matchCount').textContent = `Found ${matches.length} match(es)`;
     });
   </script>
