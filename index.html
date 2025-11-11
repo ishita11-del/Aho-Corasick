@@ -35,12 +35,15 @@
         📊 Load Large Test (See the difference!)
       </button>
 
-      <div class="flex gap-4">
+      <div class="flex gap-4 flex-wrap">
         <button id="naiveBtn" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded shadow-lg transition">
           🔍 Naive Search
         </button>
         <button id="ahoBtn" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded shadow-lg transition">
           ⚡ Aho–Corasick Search
+        </button>
+        <button id="compareBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded shadow-lg transition">
+          ⚖️ Compare Both (10 runs avg)
         </button>
       </div>
     </section>
@@ -262,6 +265,71 @@
       document.getElementById('outputArea').innerHTML = '<span class="text-green-400">✅ Large test data loaded! Now try both search methods and compare times.</span>';
       document.getElementById('timeDisplay').textContent = '';
       document.getElementById('matchCount').textContent = `Text length: ${largeText.length} chars | Patterns: ${patterns.split(',').length}`;
+    });
+
+    document.getElementById('compareBtn').addEventListener('click', () => {
+      const text = document.getElementById('textInput').value;
+      const patterns = document.getElementById('patternsInput').value
+        .split(',')
+        .map(p => p.trim())
+        .filter(p => p);
+      
+      if (!text) {
+        document.getElementById('outputArea').innerHTML = '<span class="text-red-400">Please enter some text!</span>';
+        return;
+      }
+      if (patterns.length === 0) {
+        document.getElementById('outputArea').innerHTML = '<span class="text-red-400">Please enter at least one pattern!</span>';
+        return;
+      }
+
+      document.getElementById('outputArea').innerHTML = '<span class="text-yellow-400">⏳ Running 10 iterations of each algorithm...</span>';
+      document.getElementById('timeDisplay').textContent = 'Please wait...';
+      
+      // Use setTimeout to allow UI to update
+      setTimeout(() => {
+        const runs = 10;
+        let naiveTimes = [];
+        let ahoTimes = [];
+        let ahoBuildTimes = [];
+        let matches = null;
+
+        // Run naive search multiple times
+        for (let i = 0; i < runs; i++) {
+          const result = naiveSearch(text, patterns);
+          naiveTimes.push(result.time);
+          if (i === 0) matches = result.matches;
+        }
+
+        // Run Aho-Corasick search multiple times
+        for (let i = 0; i < runs; i++) {
+          const result = ahoCorasickSearch(text, patterns);
+          ahoTimes.push(result.time);
+          ahoBuildTimes.push(result.buildTime);
+        }
+
+        // Calculate averages
+        const avgNaive = naiveTimes.reduce((a, b) => a + b, 0) / runs;
+        const avgAhoSearch = ahoTimes.reduce((a, b) => a + b, 0) / runs;
+        const avgAhoBuild = ahoBuildTimes.reduce((a, b) => a + b, 0) / runs;
+        const avgAhoTotal = avgAhoSearch + avgAhoBuild;
+
+        // Determine winner
+        const winner = avgNaive < avgAhoTotal ? 'Naive' : 'Aho-Corasick';
+        const speedup = avgNaive < avgAhoTotal 
+          ? ((avgAhoTotal / avgNaive - 1) * 100).toFixed(1)
+          : ((avgNaive / avgAhoTotal - 1) * 100).toFixed(1);
+
+        document.getElementById('outputArea').innerHTML = highlightText(text, matches);
+        document.getElementById('timeDisplay').innerHTML = `
+          <div class="space-y-1">
+            <div>🔍 <strong>Naive:</strong> ${avgNaive.toFixed(4)} ms (avg of ${runs} runs)</div>
+            <div>⚡ <strong>Aho-Corasick:</strong> Build: ${avgAhoBuild.toFixed(4)} ms | Search: ${avgAhoSearch.toFixed(4)} ms | Total: ${avgAhoTotal.toFixed(4)} ms</div>
+            <div class="text-yellow-400 mt-2">🏆 <strong>${winner}</strong> is ${speedup}% faster for this input!</div>
+          </div>
+        `;
+        document.getElementById('matchCount').textContent = `Found ${matches.length} match(es)`;
+      }, 100);
     });
   
   </script>
